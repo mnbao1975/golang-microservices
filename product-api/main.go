@@ -24,9 +24,11 @@ func main() {
 
 	postRouter := sm.Methods(http.MethodPost).Subrouter()
 	postRouter.HandleFunc("/", ph.AddProduct)
+	postRouter.Use(ph.MiddlewareValidateProduct)
 
 	putRouter := sm.Methods(http.MethodPut).Subrouter()
 	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+	putRouter.Use(ph.MiddlewareValidateProduct)
 
 	s := &http.Server{
 		Addr:         ":3000",

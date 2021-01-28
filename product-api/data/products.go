@@ -4,16 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"regexp"
 	"time"
+
+	"github.com/go-playground/validator"
 )
 
 // Product defines the structure for an API product
 type Product struct {
 	ID          int     `json:"id"` //change name of ID to id
-	Name        string  `json:"name"`
+	Name        string  `json:"name" validate:"required"`
 	Description string  `json:"description"`
-	Price       float32 `json:"price"`
-	SKU         string  `json:"sku"`
+	Price       float32 `json:"price" validate:"gt=0"`
+	SKU         string  `json:"sku" validate:"required,sku"`
 	CreatedOn   string  `json:"-"` // ignore it
 	UpdatedOn   string  `json:"-"`
 	DeletedOn   string  `json:"-"`
@@ -23,6 +26,25 @@ type Product struct {
 func (p *Product) FromJSON(r io.Reader) error {
 	e := json.NewDecoder(r)
 	return e.Decode(p)
+}
+
+// Validate will validate the json data of product
+func (p *Product) Validate() error {
+	validate := validator.New()
+	validate.RegisterValidation("sku", validateSKU)
+	return validate.Struct(p)
+}
+
+func validateSKU(fl validator.FieldLevel) bool {
+	// SKU is of format abc-cfdf-dfsgh
+	reg := regexp.MustCompile(`[a-z]+-[a-z]+-[a-z]+`)
+	matches := reg.FindAllString(fl.Field().String(), -1)
+	fmt.Println(matches)
+	if len(matches) != 1 {
+		return false
+	}
+
+	return true
 }
 
 // Products type is a custom type and a collection of Product
@@ -86,7 +108,8 @@ var productList = []*Product{
 		Price:       2.45,
 		SKU:         "abc232",
 		CreatedOn:   time.Now().UTC().String(),
-		UpdatedOn:   time.Now().UTC().String()},
+		UpdatedOn:   time.Now().UTC().String(),
+	},
 	&Product{
 		ID:          2,
 		Name:        "Espresso",
@@ -94,4 +117,6 @@ var productList = []*Product{
 		Price:       1.99,
 		SKU:         "fgd324",
 		CreatedOn:   time.Now().UTC().String(),
-		UpdatedOn:   time.Now().UTC().String()}}
+		UpdatedOn:   time.Now().UTC().String(),
+	},
+}
