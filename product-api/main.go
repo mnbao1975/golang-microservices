@@ -16,7 +16,10 @@ import (
 
 func commonMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		rw.Header().Add("Content-Type", "application/json")
+		rw.Header().Set("Content-Type", "application/json")
+		// Enable CORS
+		rw.Header().Set("Access-Control-Allow-Origin", "*")
+		// Call the next handdler
 		next.ServeHTTP(rw, r)
 	})
 }
@@ -27,7 +30,7 @@ func main() {
 	ph := handlers.NewProducts(l)
 
 	sm := mux.NewRouter()
-	//sm.Use(commonMiddleware)
+	sm.Use(commonMiddleware)
 
 	getR := sm.Methods(http.MethodGet).Subrouter()
 	getR.HandleFunc("/products", ph.GetProducts)
