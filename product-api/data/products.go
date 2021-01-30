@@ -1,14 +1,15 @@
 package data
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"regexp"
 	"time"
 
 	"github.com/go-playground/validator"
 )
+
+// ErrProductNotFound ..
+var ErrProductNotFound = fmt.Errorf("Product not found")
 
 // Product defines the structure for an API product
 type Product struct {
@@ -22,11 +23,15 @@ type Product struct {
 	DeletedOn   string  `json:"-"`
 }
 
+// Products type is a custom type and a collection of Product
+// We can create a func for it
+type Products []*Product
+
 // FromJSON read POST data from request and parse it and assign it to Product
-func (p *Product) FromJSON(r io.Reader) error {
-	e := json.NewDecoder(r)
-	return e.Decode(p)
-}
+// func (p *Product) FromJSON(r io.Reader) error {
+// 	e := json.NewDecoder(r)
+// 	return e.Decode(p)
+// }
 
 // Validate will validate the json data of product
 func (p *Product) Validate() error {
@@ -47,21 +52,28 @@ func validateSKU(fl validator.FieldLevel) bool {
 	return true
 }
 
-// Products type is a custom type and a collection of Product
-// We can create a func for it
-type Products []*Product
-
 // ToJSON serializes the contents of the products collection to JSON
 // NewEncoder provides better performance than json.Marshal() as it does not buffer
 // the output into memory
-func (p *Products) ToJSON(w io.Writer) error {
-	e := json.NewEncoder(w)
-	return e.Encode(p)
-}
+// func (p *Products) ToJSON(w io.Writer) error {
+// 	e := json.NewEncoder(w)
+// 	return e.Encode(p)
+// }
 
-// GetProducts will return products list
+// // ToJSONOneProduct serialized the content of one product
+// func (p *Product) ToJSONOneProduct(w io.Writer) error {
+// 	e := json.NewEncoder(w)
+// 	return e.Encode(p)
+// }
+
+// GetProducts returns products list
 func GetProducts() Products {
 	return productList
+}
+
+// GetOneProduct returns one product by id
+func GetOneProduct(id int) (*Product, int, error) {
+	return findProduct(id)
 }
 
 // AddProduct will add a new product submited from client
@@ -88,9 +100,6 @@ func UpdateProduct(id int, p *Product) error {
 	return nil
 }
 
-// ErrProductNotFound ..
-var ErrProductNotFound = fmt.Errorf("Product not found")
-
 func findProduct(id int) (*Product, int, error) {
 	for i, p := range productList {
 		if p.ID == id {
@@ -100,6 +109,7 @@ func findProduct(id int) (*Product, int, error) {
 	return nil, -1, ErrProductNotFound
 }
 
+// Fake dataset
 var productList = []*Product{
 	&Product{
 		ID:          1,

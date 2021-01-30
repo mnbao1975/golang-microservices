@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -19,26 +20,34 @@ func main() {
 	ph := handlers.NewProducts(l)
 
 	sm := mux.NewRouter()
-	getRouter := sm.Methods(http.MethodGet).Subrouter()
-	getRouter.HandleFunc("/", ph.GetProducts)
+	getR := sm.Methods(http.MethodGet).Subrouter()
+	getR.HandleFunc("/", ph.GetProducts)
+	getR.HandleFunc("/{id:[0-9]+}", ph.GetOneProduct)
 
-	postRouter := sm.Methods(http.MethodPost).Subrouter()
-	postRouter.HandleFunc("/", ph.AddProduct)
-	postRouter.Use(ph.MiddlewareValidateProduct)
+	postR := sm.Methods(http.MethodPost).Subrouter()
+	postR.HandleFunc("/", ph.AddProduct)
+	postR.Use(ph.MiddlewareValidateProduct)
 
-	putRouter := sm.Methods(http.MethodPut).Subrouter()
-	putRouter.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
-	putRouter.Use(ph.MiddlewareValidateProduct)
+	putR := sm.Methods(http.MethodPut).Subrouter()
+	putR.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+	putR.Use(ph.MiddlewareValidateProduct)
+
+	sm.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"message": "request not found",
+		})
+	})
 
 	s := &http.Server{
 		Addr:         ":3000",
 		Handler:      sm,
-		IdleTimeout:  120 * time.Second,
+		IdleTimeout:  120 * time.Second, // the max time for connections using TCP Keep-Alive
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second}
 
-	fmt.Println("Server is running")
 	go func() {
+		fmt.Println("Server is running")
 		err := s.ListenAndServe()
 		if err != nil {
 			l.Fatal(err)
@@ -51,8 +60,8 @@ func main() {
 
 	sig := <-sigChan
 	l.Println("Receive terminate, graceful shutdown:", sig)
-	tc, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	s.Shutdown(tc)
+	s.Shutdown(ctx)
 }
