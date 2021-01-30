@@ -14,22 +14,31 @@ import (
 	"github.com/mnbao1975/microservices/product-api/handlers"
 )
 
+func commonMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		rw.Header().Add("Content-Type", "application/json")
+		next.ServeHTTP(rw, r)
+	})
+}
+
 func main() {
 	l := log.New(os.Stdout, "production-api: ", log.LstdFlags)
 
 	ph := handlers.NewProducts(l)
 
 	sm := mux.NewRouter()
+	//sm.Use(commonMiddleware)
+
 	getR := sm.Methods(http.MethodGet).Subrouter()
-	getR.HandleFunc("/", ph.GetProducts)
-	getR.HandleFunc("/{id:[0-9]+}", ph.GetOneProduct)
+	getR.HandleFunc("/products", ph.GetProducts)
+	getR.HandleFunc("/products/{id:[0-9]+}", ph.GetOneProduct)
 
 	postR := sm.Methods(http.MethodPost).Subrouter()
-	postR.HandleFunc("/", ph.AddProduct)
+	postR.HandleFunc("/products", ph.AddProduct)
 	postR.Use(ph.MiddlewareValidateProduct)
 
 	putR := sm.Methods(http.MethodPut).Subrouter()
-	putR.HandleFunc("/{id:[0-9]+}", ph.UpdateProduct)
+	putR.HandleFunc("/products/{id:[0-9]+}", ph.UpdateProduct)
 	putR.Use(ph.MiddlewareValidateProduct)
 
 	sm.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -44,7 +53,8 @@ func main() {
 		Handler:      sm,
 		IdleTimeout:  120 * time.Second, // the max time for connections using TCP Keep-Alive
 		ReadTimeout:  1 * time.Second,
-		WriteTimeout: 1 * time.Second}
+		WriteTimeout: 1 * time.Second,
+	}
 
 	go func() {
 		fmt.Println("Server is running")

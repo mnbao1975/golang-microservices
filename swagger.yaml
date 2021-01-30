@@ -1,0 +1,24 @@
+basePath: /v2
+consumes:
+- application/json
+- application/xml
+host: localhost
+info:
+  description: |-
+    Package handlers Product API
+    Documentation Product API.
+  version: 0.0.1
+paths:
+  /:
+    get:
+      description: Returns a list of products
+      operationId: listProducts
+      tags:
+      - products
+produces:
+- application/json
+- application/xml
+schemes:
+- http
+- https
+swagger: "2.0"

@@ -1,3 +1,20 @@
+//Package handlers Product API
+//	Documentation Product API.
+//
+//		Schemes: http, https
+//		Host: localhost
+//		BasePath: /v2
+//		Version: 0.0.1
+//
+//		Consumes:
+//		- application/json
+//		- application/xml
+//
+//		Produces:
+//		- application/json
+//		- application/xml
+//
+//	swagger:meta
 package handlers
 
 import (
@@ -10,6 +27,11 @@ import (
 
 // KeyProduct is the key used for the Product in the context
 type KeyProduct struct{}
+
+// GenericError is a generic error message returned by a server
+type GenericError struct {
+	Message string `json:"message"`
+}
 
 // Products defines ...
 type Products struct {

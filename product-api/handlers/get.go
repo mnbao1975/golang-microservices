@@ -19,6 +19,9 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//	swagger:route GET /products products listProducts
+//	Returns a list of products
+
 // GetOneProduct returns a product by id
 func (p *Products) GetOneProduct(rw http.ResponseWriter, r *http.Request) {
 	id := getProductID(r)

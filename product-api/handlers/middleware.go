@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/mnbao1975/microservices/product-api/data"
@@ -16,7 +15,8 @@ func (p *Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
 		err := data.FromJSON(&prod, r.Body)
 		if err != nil {
 			p.l.Println("[ERROR] decentializing product")
-			http.Error(rw, "Error reading proudct", http.StatusBadRequest)
+			rw.WriteHeader(http.StatusBadRequest)
+			data.ToJSON(GenericError{Message: err.Error()}, rw)
 			return
 		}
 
@@ -24,11 +24,9 @@ func (p *Products) MiddlewareValidateProduct(next http.Handler) http.Handler {
 		err = prod.Validate()
 		if err != nil {
 			p.l.Println("[ERROR] validating product", err)
-			http.Error(
-				rw,
-				fmt.Sprintf("Error validating proudct: %s", err),
-				http.StatusBadRequest,
-			)
+			rw.WriteHeader(http.StatusBadRequest)
+			data.ToJSON(GenericError{Message: err.Error()}, rw)
+
 			return
 		}
 
