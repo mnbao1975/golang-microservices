@@ -16,13 +16,15 @@ func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 
 	err := data.UpdateProduct(id, &prod)
 	if err == data.ErrProductNotFound {
-		http.Error(rw, "Product not found", http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
+		data.ToJSON(GenericError{Message: "Product not found"}, rw)
 		return
 	}
 	// Other update error
 	if err != nil {
 		p.l.Println("[ERROR] internal server error")
-		http.Error(rw, "Server error", http.StatusInternalServerError)
+		rw.WriteHeader(http.StatusInternalServerError)
+		data.ToJSON(GenericError{Message: "Server error"}, rw)
 		return
 	}
 }

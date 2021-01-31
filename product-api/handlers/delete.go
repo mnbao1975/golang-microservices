@@ -13,8 +13,8 @@ func (p *Products) DeleteProduct(rw http.ResponseWriter, r *http.Request) {
 
 	prod, _, err := data.GetOneProduct(id)
 	if err == data.ErrProductNotFound {
-		http.Error(rw, "Product not found", http.StatusNotFound)
-		return
+		rw.WriteHeader(http.StatusNotFound)
+		data.ToJSON(GenericError{Message: "Product not found"}, rw)
 	}
 	// Stream the JSON to client, no need to complete parsing it and send to client
 	err = data.ToJSON(prod, rw)

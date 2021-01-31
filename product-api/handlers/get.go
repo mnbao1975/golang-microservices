@@ -14,7 +14,8 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	// Stream the JSON to client, no need to complete parsing it and send to client
 	err := data.ToJSON(lp, rw)
 	if err != nil {
-		http.Error(rw, "Unable to marshal json", http.StatusInternalServerError)
+		rw.WriteHeader(http.StatusInternalServerError)
+		data.ToJSON(GenericError{Message: err.Error()}, rw)
 		return
 	}
 }
@@ -29,13 +30,15 @@ func (p *Products) GetOneProduct(rw http.ResponseWriter, r *http.Request) {
 
 	prod, _, err := data.GetOneProduct(id)
 	if err == data.ErrProductNotFound {
-		http.Error(rw, "Product not found", http.StatusNotFound)
+		rw.WriteHeader(http.StatusNotFound)
+		data.ToJSON(GenericError{Message: "Product not found"}, rw)
 		return
 	}
 	// Stream the JSON to client, no need to complete parsing it and send to client
 	err = data.ToJSON(prod, rw)
 	if err != nil {
-		http.Error(rw, "Unable to marshal json", http.StatusInternalServerError)
+		rw.WriteHeader(http.StatusInternalServerError)
+		data.ToJSON(GenericError{Message: err.Error()}, rw)
 		return
 	}
 }
