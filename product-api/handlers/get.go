@@ -6,6 +6,11 @@ import (
 	"github.com/mnbao1975/microservices/product-api/data"
 )
 
+//	swagger:route GET /products products listProducts
+//	Returns a list of products
+//	responses:
+//		200: productsResponse
+
 // GetProducts return list of products
 func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	p.l.Println("GET products")
@@ -20,8 +25,11 @@ func (p *Products) GetProducts(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//	swagger:route GET /products products listProducts
-//	Returns a list of products
+//	swagger:route GET /products/{id} products listOneProduct
+//	Returns a product
+//	responses:
+//		200: productResponse
+//		400: errorResponse
 
 // GetOneProduct returns a product by id
 func (p *Products) GetOneProduct(rw http.ResponseWriter, r *http.Request) {

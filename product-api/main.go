@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
 	"github.com/mnbao1975/microservices/product-api/handlers"
 )
@@ -43,6 +44,13 @@ func main() {
 	putR := sm.Methods(http.MethodPut).Subrouter()
 	putR.HandleFunc("/products/{id:[0-9]+}", ph.UpdateProduct)
 	putR.Use(ph.MiddlewareValidateProduct)
+
+	// handler for documentation
+	opts := middleware.RedocOpts{SpecURL: "/swagger.yaml"}
+	sh := middleware.Redoc(opts, nil)
+
+	getR.Handle("/docs", sh)
+	getR.Handle("/swagger.yaml", http.FileServer(http.Dir("./")))
 
 	sm.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusNotFound)

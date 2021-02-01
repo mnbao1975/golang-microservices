@@ -11,8 +11,13 @@ import (
 // ErrProductNotFound ..
 var ErrProductNotFound = fmt.Errorf("Product not found")
 
-// Product defines the structure for an API product
+//Product defines the structure for an API product
+//	swagger:model
 type Product struct {
+	// the id for this product
+	//
+	// required: true
+	// min: 1
 	ID          int     `json:"id"` //change name of ID to id
 	Name        string  `json:"name" validate:"required"`
 	Description string  `json:"description"`
