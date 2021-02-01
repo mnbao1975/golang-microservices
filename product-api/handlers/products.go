@@ -1,21 +1,3 @@
-//Package handlers Product API
-//
-//	Documentation Product API.
-//
-//		Schemes: http, https
-//		Host: localhost
-//		BasePath: /v2
-//		Version: 1.0.0
-//
-//		Consumes:
-//		- application/json
-//		- application/xml
-//
-//		Produces:
-//		- application/json
-//		- application/xml
-//
-//	swagger:meta
 package handlers
 
 import (
@@ -23,39 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/mnbao1975/microservices/product-api/data"
-
 	"github.com/gorilla/mux"
 )
-
-//	A list of products return in the response
-//	swagger:response productsResponse
-type productsResponseWrapper struct {
-	//	in: body
-	Body []data.Product
-}
-
-//	A product returns in the response
-//	swagger:response productResponse
-type productResponseWrapper struct {
-	//	in: body
-	Body data.Product
-}
-
-//	An error returns in the response
-//	swagger:response errorResponse
-type errorResponseWrapper struct {
-	//	in: body
-	Body GenericError
-}
-
-//	swagger:parameters listOneProduct
-type productIDParam struct {
-	//	The id of product given on the URI path
-	//	in: path
-	//	required: true
-	ID int `json:"id"`
-}
 
 // KeyProduct is the key used for the Product in the context
 type KeyProduct struct{}

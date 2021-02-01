@@ -6,6 +6,11 @@ import (
 	"github.com/mnbao1975/microservices/product-api/data"
 )
 
+//	swagger:route PUT /products/{id} products updateProduct
+//	Update a product
+//	responses:
+//		200: noContentResponse
+
 // UpdateProduct will update a product by id
 func (p *Products) UpdateProduct(rw http.ResponseWriter, r *http.Request) {
 	id := getProductID(r)
