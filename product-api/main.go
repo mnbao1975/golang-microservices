@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/go-openapi/runtime/middleware"
-	gohandlers "github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/mnbao1975/microservices/product-api/handlers"
 )
@@ -60,9 +59,11 @@ func main() {
 		})
 	})
 
+	// CORS
+	//ch := gohandlers.CORS(gohandlers.AllowedOrigins([]string{"http://localhost:9090"}))
 	s := &http.Server{
 		Addr:         ":3000",
-		Handler:      gohandlers.CompressHandler(sm),
+		Handler:      sm,                //gohandlers.CORS()(sm),
 		IdleTimeout:  120 * time.Second, // the max time for connections using TCP Keep-Alive
 		ReadTimeout:  1 * time.Second,
 		WriteTimeout: 1 * time.Second,
