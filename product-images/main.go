@@ -11,8 +11,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/mnbao1975/microservices/product-images/files"
 	"github.com/mnbao1975/microservices/product-images/handlers"
 )
+
+// Base path to save images
+var basePath string = "./imagestore"
 
 func commonMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -33,11 +37,23 @@ func ping() func(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	l := log.New(os.Stdout, "production-images: ", log.LstdFlags)
+	stor, err := files.NewLocal(basePath, 1024*1000*5)
 
-	hh := handlers.NewHello(l)
+	if err != nil {
+		l.Println("Unable to create stoe: ", err)
+		os.Exit(1)
+	}
+
+	fh := handlers.NewFiles(stor, l)
+
 	sm := mux.NewRouter()
 	sm.Use(commonMiddleware)
 
+	ph := sm.Methods(http.MethodPost).Subrouter()
+	ph.HandleFunc("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", fh.ServeHTTP)
+
+	// Just for testing
+	hh := handlers.NewHello(l)
 	sm.HandleFunc("/hello", hh.SayHello).Methods(http.MethodGet)
 	// getR := sm.Methods(http.MethodGet).Subrouter()
 	// getR.HandleFunc("/hello", hh.SayHello)
