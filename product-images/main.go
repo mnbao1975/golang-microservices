@@ -43,14 +43,23 @@ func main() {
 		l.Println("Unable to create stoe: ", err)
 		os.Exit(1)
 	}
-
+	// File the handlers
 	fh := handlers.NewFiles(stor, l)
 
 	sm := mux.NewRouter()
 	sm.Use(commonMiddleware)
 
+	// Upload
 	ph := sm.Methods(http.MethodPost).Subrouter()
-	ph.HandleFunc("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", fh.ServeHTTP)
+	ph.HandleFunc("/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}", fh.UploadREST)
+	ph.HandleFunc("/", fh.UploadMultipart)
+
+	// Get file
+	gh := sm.Methods(http.MethodGet).Subrouter()
+	gh.Handle(
+		"/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}",
+		http.StripPrefix("/images/", http.FileServer(http.Dir(basePath))),
+	)
 
 	// Just for testing
 	hh := handlers.NewHello(l)
