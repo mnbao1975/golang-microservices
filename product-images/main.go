@@ -45,6 +45,7 @@ func main() {
 	}
 	// File the handlers
 	fh := handlers.NewFiles(stor, l)
+	mh := handlers.GzipHandler{}
 
 	sm := mux.NewRouter()
 	sm.Use(commonMiddleware)
@@ -60,6 +61,8 @@ func main() {
 		"/images/{id:[0-9]+}/{filename:[a-zA-Z]+\\.[a-z]{3}}",
 		http.StripPrefix("/images/", http.FileServer(http.Dir(basePath))),
 	)
+	// Use middleware
+	gh.Use(mh.GzipMiddleware)
 
 	// Just for testing
 	hh := handlers.NewHello(l)
